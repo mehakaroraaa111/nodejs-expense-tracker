@@ -1,33 +1,62 @@
 # Expense Tracker API
 
-A RESTful backend API for managing personal expenses, built with Node.js, Express.js, and MongoDB. The API supports user authentication and allows each user to securely create, view, update, and delete their own expenses.
+A RESTful backend API for managing personal expenses, built with **Node.js, Express.js, and MongoDB Atlas**. The API provides secure user authentication and allows users to create, retrieve, update, and delete their own expenses.
+
+## Live Deployment
+
+**Base URL:** https://nodejs-expense-tracker-4vyc.onrender.com
+
+This is a backend API, so opening the base URL in a browser may return a route-not-found response. Use the API endpoints below to interact with the application.
 
 ## Features
 
-- **User Authentication:** Signup and login with password hashing using bcrypt.
-- **JWT Authorization:** Protects expense routes using JSON Web Tokens.
-- **Expense Management:** Create, retrieve, update, and delete expenses.
-- **User-Specific Data:** Users can access and manage only their own expenses.
+- **User Authentication:** User signup and login with password hashing using bcrypt.
+- **JWT Authentication:** Protects expense endpoints using JSON Web Tokens.
+- **Expense CRUD:** Create, retrieve, update, and delete expenses.
+- **User-Specific Authorization:** Users can access and manage only their own expenses.
 - **Input Validation:** Validates expense fields and MongoDB ObjectIds.
-- **Database Integration:** Stores users and expenses in MongoDB using Mongoose.
-- **Error Handling:** Centralized handling of asynchronous errors and consistent API error responses.
+- **Database Integration:** Stores users and expenses in MongoDB Atlas using Mongoose.
+- **Centralized Error Handling:** Handles asynchronous errors and returns consistent API error responses.
+- **Cloud Deployment:** Deployed on Render with environment-based configuration.
 
 ## Tech Stack
 
 - Node.js
 - Express.js
-- MongoDB
+- MongoDB Atlas
 - Mongoose
 - JSON Web Tokens (JWT)
 - bcrypt
+- dotenv
 - Thunder Client for API testing
+
+## API Endpoints
+
+### Authentication
+
+| Method | Endpoint | Description | Authentication |
+|---|---|---|---|
+| POST | `/auth/signup` | Register a new user | Not required |
+| POST | `/auth/login` | Log in and receive a JWT | Not required |
+
+### Expenses
+
+All expense endpoints require a valid JWT Bearer token.
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/expenses` | Retrieve all expenses for the logged-in user |
+| GET | `/expenses/:id` | Retrieve one expense by ID |
+| POST | `/expenses` | Create a new expense |
+| PUT | `/expenses/:id` | Update an existing expense |
+| DELETE | `/expenses/:id` | Delete an expense |
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js and npm
-- MongoDB running locally or a MongoDB connection URI
+- A MongoDB instance, either local or MongoDB Atlas
 - Thunder Client or another API testing tool
 
 ### Installation
@@ -54,11 +83,11 @@ A RESTful backend API for managing personal expenses, built with Node.js, Expres
 
    ```env
    PORT=3000
-   MONGO_URI=mongodb://localhost:27017/expense_tracker
-   JWT_SECRET=replace_with_a_long_random_secret
+   MONGO_URI=your_mongodb_connection_uri
+   JWT_SECRET=your_long_random_secret
    ```
 
-   Use a strong, private JWT secret. Never commit your `.env` file or real credentials to GitHub.
+   Replace the example values with your own configuration. Never commit `.env` or expose database credentials and JWT secrets.
 
 5. Start the development server:
 
@@ -72,38 +101,39 @@ A RESTful backend API for managing personal expenses, built with Node.js, Expres
    npm start
    ```
 
-The API will run at `http://localhost:3000`, provided the port is available.
+The API will run locally at `http://localhost:3000`, provided the port is available.
 
-## API Endpoints
+## Authentication and Usage
 
-### Authentication
+### 1. Register a user
 
-| Method | Endpoint | Description | Authentication |
-|---|---|---|---|
-| POST | `/auth/signup` | Register a new user | Not required |
-| POST | `/auth/login` | Log in and receive a JWT | Not required |
+Send a `POST` request to `/auth/signup` with a JSON body:
 
-### Expenses
+```json
+{
+  "name": "Test User",
+  "email": "test@example.com",
+  "password": "your_test_password"
+}
+```
 
-All expense endpoints require a valid JWT Bearer token.
+Use your own test credentials when trying the API.
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/expenses` | Get all expenses belonging to the logged-in user |
-| GET | `/expenses/:id` | Get one expense by ID |
-| POST | `/expenses` | Create a new expense |
-| PUT | `/expenses/:id` | Update an existing expense |
-| DELETE | `/expenses/:id` | Delete an expense |
+### 2. Log in
 
-## Example Request
+Send a `POST` request to `/auth/login` with your registered email and password. A successful response returns a JWT.
 
-### Create an Expense
+### 3. Access protected routes
 
-**POST** `/expenses`
+For expense requests, include the token in the HTTP Authorization header:
 
-Add your JWT using the `Authorization: Bearer <your-token>` header.
+```http
+Authorization: Bearer <your-jwt-token>
+```
 
-Request body:
+### 4. Create an expense
+
+Send a `POST` request to `/expenses` with the Bearer token and this JSON body:
 
 ```json
 {
@@ -113,28 +143,33 @@ Request body:
 }
 ```
 
-The API responds with the created expense, including its generated ID, user association, and timestamps.
+The API returns the created expense with its generated ID, associated user, and timestamps.
 
 ## Error Handling
 
-The API returns appropriate HTTP status codes for common situations, including:
+The API uses appropriate HTTP status codes for common errors:
 
-- `400 Bad Request` — Invalid input or malformed expense ID
-- `401 Unauthorized` — Missing, invalid, or expired authentication token
-- `404 Not Found` — Expense not found for the authenticated user
-- `500 Internal Server Error` — Unexpected server-side error
+- `400 Bad Request` — Invalid input or malformed expense ID.
+- `401 Unauthorized` — Missing, invalid, or expired authentication token.
+- `404 Not Found` — Expense not found for the authenticated user.
+- `500 Internal Server Error` — Unexpected server-side error.
 
-## Project Purpose
+## Security
 
-This project demonstrates practical backend development concepts, including REST API design, authentication and authorization, database integration, input validation, and error handling.
+- Passwords are hashed using bcrypt.
+- Expense routes require JWT authentication.
+- Expense operations are scoped to the authenticated user.
+- Sensitive configuration is stored in environment variables rather than committed to source control.
 
 ## Future Improvements
 
-- Automated tests for API endpoints
-- API documentation with Swagger
-- Deployment to a cloud hosting platform
-- Rate limiting and additional security controls
+- Automated tests for API endpoints.
+- API documentation using Swagger/OpenAPI.
+- Rate limiting and additional security hardening.
+- A frontend interface for tracking expenses.
 
 ## Author
 
-Mehak
+**Mehak**
+
+- GitHub: [mehakaroraaa111](https://github.com/mehakaroraaa111)
