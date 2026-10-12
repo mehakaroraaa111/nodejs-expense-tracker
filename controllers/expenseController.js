@@ -1,71 +1,110 @@
-import { readFile,writeFile } from 'fs/promises';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { getAllExpenses,
+
+import mongoose from 'mongoose';
+
+import {
+    getAllExpenses,
     createExpense as createExpenseService,
     updateExpense as updateExpenseService,
-    deleteExpense as deleteExpenseService
- } from '../services/expenseService.js';
+    deleteExpense as deleteExpenseService,
+    getExpenseById
+} from '../services/expenseService.js';
+
 import { asyncHandler } from '../utils/asyncHandler.js';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
-const expensesFile = path.join(__dirname, '..', 'expenses.json');
-
+// GET all expenses
 export const getExpenses = asyncHandler(async (req, res) => {
-    const expenses = await getAllExpenses();
+    const expenses = await getAllExpenses(req.user.userId);
 
     res.json(expenses);
 });
+
+// GET one expense
+export const getExpense = asyncHandler(async (req, res) => {
+    const id = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({
+            error: 'Invalid expense ID'
+        });
+    }
+
+    const expense = await getExpenseById(
+        id,
+        req.user.userId
+    );
+
+    if (!expense) {
+        return res.status(404).json({
+            error: 'Expense not found'
+        });
+    }
+
+    res.json(expense);
+});
+
+// CREATE expense
 export const createExpense = asyncHandler(async (req, res) => {
-    const { title, amount, category } = req.body;
-if(!title || !amount || !category){
-    return res.status(404).json({
-        error:'Title,amount,category are required'
-    });
-};
-if(typeof amount !== 'number' || amount <=0){
-    return res.status(404).json({
-        error:'Amount must be a positive number '
-    });
-};
+  const { title, amount, category } = req.body ?? {};
+
+    if (
+        typeof title !== 'string' ||
+        !title.trim() ||
+        typeof category !== 'string' ||
+        !category.trim() ||
+        amount === undefined ||
+        typeof amount !== 'number' ||
+        !Number.isFinite(amount) ||
+        amount <= 0
+    ) {
+        return res.status(400).json({
+            error: 'Valid title, category and positive amount are required'
+        });
+    }
+
     const newExpense = await createExpenseService(
-        title,
+        title.trim(),
         amount,
-        category
+        category.trim(),
+        req.user.userId
     );
 
     res.status(201).json(newExpense);
 });
+
+// UPDATE expense
 export const updateExpense = asyncHandler(async (req, res) => {
-    const id = Number(req.params.id);
- if(isNaN(id)){
-    return res.status(404).json({
-        error:'invalid expense ID'
-    });
- }
-    const { title, amount, category } = req.body;
-   if (!title || !amount || !category) {
+    const id = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({
-            error: 'Title, amount and category are required'
+            error: 'Invalid expense ID'
         });
     }
 
-    if (typeof amount !== 'number' || amount <= 0) {
+    const { title, amount, category } = req.body ?? {};
+
+    if (
+        typeof title !== 'string' ||
+        !title.trim() ||
+        typeof category !== 'string' ||
+        !category.trim() ||
+        amount === undefined ||
+        typeof amount !== 'number' ||
+        !Number.isFinite(amount) ||
+        amount <= 0
+    ) {
         return res.status(400).json({
-            error: 'Amount must be a positive number'
+            error: 'Valid title, category and positive amount are required'
         });
     }
-
 
     const expense = await updateExpenseService(
         id,
-        title,
+        title.trim(),
         amount,
-        category
+        category.trim(),
+        req.user.userId
     );
-
-
 
     if (!expense) {
         return res.status(404).json({
@@ -75,17 +114,24 @@ export const updateExpense = asyncHandler(async (req, res) => {
 
     res.json({
         message: 'Expense updated successfully',
-        expense: expense
+        expense
     });
 });
+
+// DELETE expense
 export const deleteExpense = asyncHandler(async (req, res) => {
-    const id = Number(req.params.id);
-  if (isNaN(id)) {
+    const id = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({
             error: 'Invalid expense ID'
         });
     }
-    const deleted = await deleteExpenseService(id);
+
+    const deleted = await deleteExpenseService(
+        id,
+        req.user.userId
+    );
 
     if (!deleted) {
         return res.status(404).json({

@@ -1,20 +1,23 @@
 import express from 'express';
-import { readFile,writeFile } from 'fs/promises';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { getExpenses,createExpense, updateExpense, deleteExpense } from '../controllers/expenseController.js';
-import { logger } from '../../middleware/logger.js';
+
+import {
+    getExpenses,
+    getExpense,
+    createExpense,
+    updateExpense,
+    deleteExpense
+} from '../controllers/expenseController.js';
+
 const router = express.Router();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+router.get('/', getExpenses);
 
-const expensesFile = path.join(__dirname, '..', 'expenses.json');
-router.use(logger);
-router.get('/',getExpenses);
+router.get('/:id', getExpense);
 
 router.post('/', createExpense);
 
-router.put('/:id', updateExpense)
-router.delete('/:id', deleteExpense)
+router.put('/:id', updateExpense);
+
+router.delete('/:id', deleteExpense);
+
 export default router;
