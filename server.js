@@ -11,8 +11,10 @@ const app = express();
 
 
 app.use(cors({
-  origin: 'http://localhost:5173'
-}));
+  origin: ['http://localhost:5173',
+     'https://expense-tracker-mvtdi8lgl-mehakmehak11.vercel.app'
+  ]
+    }));
 
 app.use(express.json());
 
