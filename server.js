@@ -4,7 +4,7 @@ import express from 'express';
 import cors from 'cors';
 import expenseRoutes from './routes/expenseRoutes.js';
 import authRoutes from './routes/authRoutes.js';
-import { authMiddleware } from './middleware/authMiddleware.js';
+import { authMiddleware } from './controllers/middleware/authMiddleware.js';
 import { connectDB } from './config/db.js';
 
 const app = express();
